@@ -1,10 +1,16 @@
-use rpstree;
+use rpstree::{self, cli};
+use std::{env, process};
+
 fn main() {
-    match rpstree::run() {
-        Ok(_) => {},
+    let config = cli::Config::build(env::args()).unwrap_or_else(|e| {
+        eprintln!("{}", e);
+        process::exit(1);
+    });
+    match rpstree::run(config) {
+        Ok(_) => {}
         Err(e) => {
             eprintln!("Error: {}", e);
-            std::process::exit(1);
+            process::exit(1);
         }
     }
 }

@@ -1,13 +1,35 @@
-mod fmt;
+pub mod cli;
+mod output;
 mod process;
 
+use cli::Config;
 use process::{ProcessNode, ProcessState};
 use std::{collections::HashMap, error::Error, fs};
 
-pub fn run() -> Result<(), Box<dyn Error>> {
+pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let process_list = read_process()?;
-    let process_tree = build_process_tree(process_list)?;
-    fmt::print_tree(&process_tree, 1, 0, "", true);
+    let mut process_tree = build_process_tree(process_list)?;
+    match config {
+        Config::Help => output::print_help_info(),
+        Config::Version => output::print_version(),
+        Config::ProcessTree {
+            numeric_sort,
+            pid_visiblity,
+        } => {
+            if numeric_sort {
+                // 将子进程按照pid升序排列
+                for (_, node) in process_tree.iter_mut() {
+                    node.children.as_mut().map(|c| c.sort());
+                }
+            }
+            if pid_visiblity {
+                output::print_tree_with_pid(&process_tree, 1, 0, "", true);
+            } else {
+                output::print_tree_without_pid(&process_tree, 1, 0, "", true);
+            }
+        }
+        Config::Normal => output::print_tree_without_pid(&process_tree, 1, 0, "", true),
+    }
     Ok(())
 }
 
