@@ -1,5 +1,6 @@
 # rpstree
 基于rust编写的查看进程树的命令行工具，适用于Linux系统。
+![](./example.png)
 ## Usage
 使用如下命令显示所有顶级进程及其子进程
 ```shell
